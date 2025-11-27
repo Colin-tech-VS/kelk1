@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord Admin - JB Art{% endblock %}
+
+{% block content %}
+
+<!-- HEADER ADMIN -->
+<header class="admin-header">
+    <div class="admin-container">
+        <h1>🎨 Tableau de bord Admin</h1>
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-btn {% if active=='dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('admin_paintings') }}" class="nav-btn {% if active=='paintings' %}active{% endif %}">Peintures</a>
+            <a href="{{ url_for('admin_orders') }}" class="nav-btn {% if active=='orders' %}active{% endif %}">Commandes</a>
+            <a href="{{ url_for('admin_users') }}" class="nav-btn {% if active=='users' %}active{% endif %}">Utilisateurs</a>
+            <a href="{{ url_for('admin_exhibitions') }}" class="nav-btn {% if active=='exhibitions' %}active{% endif %}">Exhibitions</a>
+            <a href="{{ url_for('admin_notifications') }}" class="nav-btn {% if active=='notifications' %}active{% endif %}">
+                🔔 Notifications
+                {% if new_notifications_count > 0 %}
+                <span class="badge">{{ new_notifications_count }}</span>
+                {% endif %}
+            </a>
+            <!-- Nouvel onglet Paramètres -->
+            <a href="{{ url_for('admin_settings_page') }}" class="nav-btn {% if active=='settings' %}active{% endif %}">⚙️ Paramètres</a>
+
+            <a href="{{ url_for('add_painting_web') }}" class="nav-btn btn-primary">+ Ajouter</a>
+        </nav>
+    </div>
+</header>
+
+<!-- CONTENU ADMIN -->
+<section class="admin-section">
+    <div class="admin-container">
+        {% if active == 'settings' %}
+            <h2>⚙️ Paramètres API & Configurations</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" class="settings-form">
+                <div class="form-group">
+                    <label for="stripe_secret_key">Clé secrète Stripe</label>
+                    <input type="password" name="stripe_secret_key" id="stripe_secret_key" value="{{ settings['stripe_secret_key'] }}" placeholder="********">
+                </div>
+
+                <div class="form-group">
+                    <label for="google_places_key">Clé API Google Places</label>
+                    <input type="text" name="google_places_key" id="google_places_key" value="{{ settings['google_places_key'] }}" placeholder="Votre clé Google API">
+                </div>
+
+                <div class="form-group">
+                    <label for="smtp_password">Mot de passe SMTP</label>
+                    <input type="password" name="smtp_password" id="smtp_password" value="{{ settings['smtp_password'] }}" placeholder="********">
+                </div>
+
+                <div class="form-group">
+                    <label for="email_sender">Adresse email d'envoi</label>
+                    <input type="text" name="email_sender" id="email_sender" value="{{ settings['email_sender'] }}" placeholder="contact@votresite.com">
+                </div>
+
+                <button type="submit" class="btn-primary">💾 Sauvegarder</button>
+            </form>
+
+        {% else %}
+            <!-- Ici tu peux conserver toutes tes sections statistiques, commandes récentes, ruptures de stock etc. -->
+            <!-- STATISTIQUES -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🖼️</div>
+                    <div class="stat-info">
+                        <h3>Peintures</h3>
+                        <p class="stat-number">{{ total_paintings }}</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <h3>Commandes</h3>
+                        <p class="stat-number">{{ total_orders }}</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-info">
+                        <h3>Revenu total</h3>
+                        <p class="stat-number">{{ "%.2f"|format(total_revenue) }} €</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <h3>Utilisateurs</h3>
+                        <p class="stat-number">{{ total_users }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+/* Styles pour le formulaire Paramètres */
+.settings-form .form-group {
+    margin-bottom: 20px;
+}
+
+.settings-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.settings-form input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.settings-form button.btn-primary {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.settings-form button.btn-primary:hover {
+    background-color: #0069d9;
+}
+
+/* Alerts flash */
+.alert {
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Boutons Supprimer dans ruptures de stock */
+.btn-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+</style>
+
+{% endblock %}
